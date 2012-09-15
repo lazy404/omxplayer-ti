@@ -8,11 +8,11 @@ all: checkout configure compile
 
 copy:
 	find ffmpeg -name '*.so*' -exec cp {} . \;
-	$(HOST)-strip *.so*
+	strip *.so*
 
 compile: 
 	cd ffmpeg; \
-	make -j9
+	make
 
 configure: 
 	cd ffmpeg; \
@@ -20,7 +20,6 @@ configure:
 	LDFLAGS="" \
   ./configure \
 			--extra-cflags="-mfpu=vfp -mfloat-abi=$(FLOAT) -mno-apcs-stack-check -mstructure-size-boundary=32 -mno-sched-prolog" \
-			--enable-cross-compile \
 			--enable-shared \
 			--disable-static \
 			--arch=arm \
@@ -51,10 +50,7 @@ configure:
 			--enable-armv6t2 \
 			--enable-armv6 \
 			--enable-armvfp \
-			--enable-hardcoded-tables \
-			--disable-runtime-cpudetect \
-			--disable-debug \
-			--cross-prefix=$(HOST)-
+			--enable-hardcoded-tables 
 
 clean:
 	@rm -rf ffmpeg
@@ -64,6 +60,6 @@ checkout:
 	cd ffmpeg; git checkout master;	git checkout 13a7bd70c8d94c5a46c14e7ac23a170b77eff52e
 
 install:
-	cd ffmpeg; make -j9 DESTDIR="$(WORK)/ffmpeg_compiled" install
-	$(HOST)-strip ffmpeg_compiled/usr/local/lib/*.so
+	cd ffmpeg; make DESTDIR="$(WORK)/ffmpeg_compiled" install
+	strip ffmpeg_compiled/usr/local/lib/*.so
 

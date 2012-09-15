@@ -45,7 +45,7 @@ list_test:
 
 omxplayer.bin: $(OBJS)
 	$(CXX) $(LDFLAGS) -o omxplayer.bin $(OBJS) -lvchiq_arm -lvcos -lrt -lpthread -lavutil -lavcodec -lavformat -lswscale -lpcre
-	#arm-unknown-linux-gnueabi-strip omxplayer.bin
+	strip omxplayer.bin
 
 clean:
 	for i in $(OBJS); do (if test -e "$$i"; then ( rm $$i ); fi ); done
@@ -61,11 +61,11 @@ ffmpeg:
 	make -f Makefile.ffmpeg install
 
 dist: omxplayer.bin
-	mkdir -p $(DIST)/usr/lib/omxplayer
-	mkdir -p $(DIST)/usr/bin
-	mkdir -p $(DIST)/usr/share/doc
-	cp omxplayer omxplayer.bin $(DIST)/usr/bin
-	cp COPYING $(DIST)/usr/share/doc/
-	cp README.md $(DIST)/usr/share/doc/README
-	cp -a ffmpeg_compiled/usr/local/lib/*.so* $(DIST)/usr/lib/omxplayer/
+	mkdir -p $(DIST)/usr/local/lib/omxplayer
+	mkdir -p $(DIST)/usr/local/bin
+	mkdir -p $(DIST)/usr/local/share/doc
+	cp omxplayer omxplayer.bin $(DIST)/usr/local/bin
+	cp COPYING $(DIST)/usr/local/share/doc/
+	cp README.md $(DIST)/usr/local/share/doc/README
+	cp -a ffmpeg_compiled/usr/local/lib/*.so* $(DIST)/usr/local/lib
 	tar -czf omxplayer-dist.tar.gz $(DIST)
