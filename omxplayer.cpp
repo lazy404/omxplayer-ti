@@ -291,6 +291,8 @@ void SetVideoMode(int width, int height, int fpsrate, int fpsscale, bool is3d)
   }
 }
 
+int startx=-1,starty=-1,xsize=-1,ysize=-1;
+
 int main(int argc, char *argv[])
 {
   signal(SIGINT, sig_handler);
@@ -339,24 +341,40 @@ int main(int argc, char *argv[])
     { "deinterlace",  no_argument,        NULL,          'd' },
     { "hw",           no_argument,        NULL,          'w' },
     { "3d",           no_argument,        NULL,          '3' },
-    { "hdmiclocksync", no_argument,       NULL,          'y' },
+    { "hdmiclocksync", no_argument,       NULL,          0x104 },
     { "refresh",      no_argument,        NULL,          'r' },
     { "sid",          required_argument,  NULL,          't' },
     { "font",         required_argument,  NULL,          0x100 },
     { "font-size",    required_argument,  NULL,          0x101 },
     { "align",        required_argument,  NULL,          0x102 },
+    { "x-pos",         required_argument,  NULL,          'x' },
+    { "y-pos",         required_argument,  NULL,          'y' },
+    { "x-size",         required_argument,  NULL,          0x108 },
+    { "y-size",         required_argument,  NULL,          0x110 },
     { 0, 0, 0, 0 }
   };
 
   int c;
-  while ((c = getopt_long(argc, argv, "wihn:o:cslpd3yt:r", longopts, NULL)) != -1)  
+  while ((c = getopt_long(argc, argv, "wihn:o:cslpd3t:rx:y:", longopts, NULL)) != -1)  
   {
     switch (c) 
     {
+      case 'x':
+	startx=atoi(optarg);
+	break;
+      case 'y':
+	starty=atoi(optarg);
+	break;
+      case 0x108:
+	xsize=atoi(optarg);
+	break;
+      case 0x110:
+	ysize=atoi(optarg);
+	break;
       case 'r':
         m_refresh = true;
         break;
-      case 'y':
+      case 0x103:
         m_hdmi_clock_sync = true;
         break;
       case '3':
@@ -520,10 +538,10 @@ int main(int argc, char *argv[])
 
   struct timespec starttime, endtime;
 
-  printf("Subtitle count : %d state %s : index %d\n", 
+/*  printf("Subtitle count : %d state %s : index %d\n", 
       m_omx_reader.SubtitleStreamCount(), m_show_subtitle ? "on" : "off", 
       (m_omx_reader.SubtitleStreamCount() > 0) ? m_subtitle_index + 1 : m_subtitle_index);
-
+*/
   while(!m_stop)
   {
     int ch[8];
@@ -819,7 +837,7 @@ int main(int argc, char *argv[])
   }
 
 do_exit:
-  printf("\n");
+  //printf("\n");
 
   if(!m_stop && !g_abort)
   {
@@ -855,6 +873,6 @@ do_exit:
   g_OMX.Deinitialize();
   g_RBP.Deinitialize();
 
-  printf("have a nice day ;)\n");
+  //printf("have a nice day ;)\n");
   return 1;
 }

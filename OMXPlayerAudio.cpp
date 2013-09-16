@@ -633,6 +633,7 @@ bool OMXPlayerAudio::OpenDecoder()
     m_decoder = NULL;
     return false;
   }
+/*
   else
   {
     if(m_passthrough)
@@ -646,7 +647,7 @@ bool OMXPlayerAudio::OpenDecoder()
         m_codec_name.c_str(), m_hints.channels, m_hints.samplerate, m_hints.bitspersample);
     }
   }
-
+*/
   return true;
 }
 

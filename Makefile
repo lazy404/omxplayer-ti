@@ -45,7 +45,7 @@ list_test:
 
 omxplayer.bin: $(OBJS)
 	$(CXX) $(LDFLAGS) -o omxplayer.bin $(OBJS) -lvchiq_arm -lvcos -lrt -lpthread -lavutil -lavcodec -lavformat -lswscale -lpcre
-	strip omxplayer.bin
+#strip omxplayer.bin
 
 clean:
 	for i in $(OBJS); do (if test -e "$$i"; then ( rm $$i ); fi ); done

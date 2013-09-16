@@ -31,6 +31,7 @@
 
 #include <VG/vgu.h>
 #include <cassert>
+#include "DllBCM.h"
 
 class BoxRenderer {
   VGPath path_;

@@ -129,6 +129,9 @@ bool COMXVideo::SendDecoderConfig()
   return true;
 }
 
+
+extern int startx, starty, xsize, ysize;
+
 bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspect, bool deinterlace, bool hdmi_clock_sync)
 {
   OMX_ERRORTYPE omx_err   = OMX_ErrorNone;
@@ -567,6 +570,69 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
   m_setStartTime      = true;
   m_setStartTimeText  = true;
 
+    OMX_CONFIG_DISPLAYREGIONTYPE configDisplay;
+//printf("set port %d %d %d %d\n", startx, starty, xsize,ysize);
+CRect             m_src_rect;
+m_src_rect.SetRect(0, 0, 0, 0);
+
+if(startx != -1 && starty >= 0 && xsize > 0 && ysize > 0) {
+    OMX_INIT_STRUCTURE(configDisplay);
+    configDisplay.nPortIndex = m_omx_render.GetInputPort();
+
+  //configDisplay.noaspect   = OMX_TRUE;
+  configDisplay.noaspect   = OMX_FALSE;
+  //configDisplay.mode    = OMX_DISPLAY_MODE_FILL; //OMX_DISPLAY_MODE_LETTERBOX;
+  configDisplay.mode    = OMX_DISPLAY_MODE_LETTERBOX;
+
+  configDisplay.set     = (OMX_DISPLAYSETTYPE)(OMX_DISPLAY_SET_DEST_RECT|OMX_DISPLAY_SET_NOASPECT|OMX_DISPLAY_SET_MODE|OMX_DISPLAY_SET_SRC_RECT);
+  configDisplay.dest_rect.x_offset  = (int) startx;
+  configDisplay.dest_rect.y_offset  = (int) starty;
+  configDisplay.dest_rect.width     = (int) xsize;
+  configDisplay.dest_rect.height    = (int) ysize;
+
+    configDisplay.src_rect.x_offset   = (int)(m_src_rect.x1+0.5f);
+    configDisplay.src_rect.y_offset   = (int)(m_src_rect.y1+0.5f);
+    configDisplay.src_rect.width      = (int)(m_src_rect.Width()+0.5f);
+    configDisplay.src_rect.height     = (int)(m_src_rect.Height()+0.5f);
+
+  omx_err = m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
+  if(omx_err != OMX_ErrorNone)
+    return false;
+
+/*  configDisplay.set     = OMX_DISPLAY_SET_TRANSFORM;
+  configDisplay.transform = OMX_DISPLAY_ROT180;
+    
+  omx_err = m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
+  if(omx_err != OMX_ErrorNone)
+    return false;
+*/
+  configDisplay.set     = OMX_DISPLAY_SET_FULLSCREEN;
+  configDisplay.fullscreen = OMX_FALSE;
+    
+  omx_err = m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
+  if(omx_err != OMX_ErrorNone)
+    return false;
+
+    OMX_INIT_STRUCTURE(configDisplay);
+    configDisplay.nPortIndex = m_omx_render.GetInputPort();
+
+    AVRational aspect;
+    float fAspect = (float)hints.aspect / (float)m_decoded_width * (float)m_decoded_height;
+
+    aspect = av_d2q(fAspect, 100);
+
+//    printf("Aspect : num %d den %d aspect %f display aspect %f\n", aspect.num, aspect.den, hints.aspect, display_aspect);
+
+    configDisplay.set      = OMX_DISPLAY_SET_PIXEL;
+    configDisplay.pixel_x  = aspect.num;
+    configDisplay.pixel_y  = aspect.den;
+    omx_err = m_omx_render.SetConfig(OMX_IndexConfigDisplayRegion, &configDisplay);
+    if(omx_err != OMX_ErrorNone)
+      return false;
+
+
+
+}else {
   // only set aspect when we have a aspect and display doesn't match the aspect
   if(display_aspect != 0.0f && (hints.aspect != display_aspect))
   {
@@ -579,7 +645,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
 
     aspect = av_d2q(fAspect, 100);
 
-    printf("Aspect : num %d den %d aspect %f display aspect %f\n", aspect.num, aspect.den, hints.aspect, display_aspect);
+//    printf("Aspect : num %d den %d aspect %f display aspect %f\n", aspect.num, aspect.den, hints.aspect, display_aspect);
 
     configDisplay.set      = OMX_DISPLAY_SET_PIXEL;
     configDisplay.pixel_x  = aspect.num;
@@ -588,6 +654,7 @@ bool COMXVideo::Open(COMXStreamInfo &hints, OMXClock *clock, float display_aspec
     if(omx_err != OMX_ErrorNone)
       return false;
   }
+}
 
   /*
   configDisplay.set     = OMX_DISPLAY_SET_LAYER;
